@@ -15,7 +15,7 @@ import java.util.Scanner;
  * @author user
  */
 public class Bodmas {
-ArrayList<String> contents;
+ArrayList<String> container;
  String temp;
     /**
      * @param args the command line arguments
@@ -32,12 +32,12 @@ ArrayList<String> contents;
         while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){
             for (int i=0;i<box.length();i++){
                 try{
-                if(box.charAt(i)==')' && box.charAt(i+1)=='('){
+                if((box.charAt(i)==')' || Character.isDigit(box.charAt(i)))&& box.charAt(i+1)=='('){
                     box=box.substring(0, i+1)+"*"+box.substring(i+1);
                 }
                 }catch (Exception ignored){}
                 if(box.charAt(i)==')'){
-                    for(int j=0;j>=0;j--){
+                    for(int j=i;j>=0;j--){
                         if(box.charAt(j)=='('){
                             String in= box.substring(j+1, i);
                             in= reading(in);
@@ -56,41 +56,48 @@ ArrayList<String> contents;
         box=reading(box);
     return box;
     }
+    /*Method that reads number and operator */
     public String reading(String read){
-            contents = new ArrayList<>();    
+            container = new ArrayList<>();    //keeps input String
             temp = "";                            //temporary String
-            for(int i=read.length()-1;i>=0;i--){
+            for(int i=read.length()-1;i>=0;i--){   //precendence order of operation reads from RIGHT to LEFT
               if(Character.isDigit(read.charAt(i))){
                   temp = read.charAt(i)+temp;
-                  if(i<=0){
-                  contents.add(0, temp);
-                  temp="";
+                  if(i==0){
+                      if(!temp.equals("")){
+                container.add(0,temp);
+                temp="";
+            }
                   }
               }else if(read.charAt(i)=='.'){
                    temp =read.charAt(i)+temp;
                   }
-                  else if(read.charAt(i)=='-' && (i<=0))
+                  else if(read.charAt(i)=='-' && (i==0 || (!Character.isDigit(read.charAt(i-1)))))
                   {
                   temp =read.charAt(i)+temp;
-                  contents.add(0, temp);
-                  temp="";
-                  }else
-                  {
-                  contents.add(0,temp);
-                  temp="";
-                  temp +=read.charAt(i);
-                  contents.add(0,temp);
-                  temp="";
-                  }
-              
+                  if(!temp.equals("")){
+                container.add(0,temp);
+                temp="";
             }
-           contents = opp(contents,"^"); //power
-           contents = opp(contents,"|"); //root
-           contents = opp(contents,"/"); //Divide
-           contents = opp(contents,"*"); //Multiple
-           contents = opp(contents,"+"); //Add
-           contents = opp(contents,"-"); //Sub
-           return contents.get(0);
+                  }else
+                  {if(!temp.equals("")){
+                container.add(0,temp);
+                temp="";
+            }
+                  temp +=read.charAt(i);
+                  if(!temp.equals("")){
+                container.add(0,temp);
+                temp="";
+            }
+                  }
+            }
+           container = opp(container,"^"); //power
+           container = opp(container,"|"); //root
+           container = opp(container,"/"); //Divide
+           container = opp(container,"*"); //Multiple
+           container = opp(container,"+"); //Add
+           container = opp(container,"-"); //Sub
+           return container.get(0);
             }
     public ArrayList<String>opp(ArrayList<String> oop, String q){
                 int scale=10;
