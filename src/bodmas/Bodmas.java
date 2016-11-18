@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author user
+ * @author Adescode
  */
 public class Bodmas {
 ArrayList<String> container;
@@ -56,7 +56,7 @@ ArrayList<String> container;
         box=reading(box);
     return box;
     }
-    /*Method that reads number and operator */
+    /*Method that reads numbers and operators */
     public String reading(String read){
             container = new ArrayList<>();    //keeps input String
             temp = "";                            //temporary String
@@ -69,11 +69,11 @@ ArrayList<String> container;
                 temp="";
             }
                   }
-              }else if(read.charAt(i)=='.'){
+              }else if(read.charAt(i)=='.' ){         //reads decimal
                    temp =read.charAt(i)+temp;
                   }
                   else if(read.charAt(i)=='-' && (i==0 || (!Character.isDigit(read.charAt(i-1)))))
-                  {
+                  {                                   //read negative numbers
                   temp =read.charAt(i)+temp;
                   if(!temp.equals("")){
                 container.add(0,temp);
@@ -91,20 +91,21 @@ ArrayList<String> container;
             }
                   }
             }
-           container = opp(container,"^"); //power
-           container = opp(container,"|"); //root
-           container = opp(container,"/"); //Divide
-           container = opp(container,"*"); //Multiple
-           container = opp(container,"+"); //Add
-           container = opp(container,"-"); //Sub
-           return container.get(0);
+           container = operator(container,"^"); //power
+           container = operator(container,"|"); //root
+           container = operator(container,"/"); //Divide
+           container = operator(container,"*"); //Multiple
+           container = operator(container,"+"); //Add
+           container = operator(container,"-"); //Sub
+           return container.get(0);             // return result
             }
-    public ArrayList<String>opp(ArrayList<String> oop, String q){
-                int scale=10;
-                 BigDecimal ex = new BigDecimal(0);
-                for(int c = 0; c<oop.size();c++){
-                if(oop.get(c).equals(q)){
-                 switch (oop.get(c)){
+    
+    public ArrayList<String>operator(ArrayList<String> oop, String q){
+        BigDecimal ex = new BigDecimal(0);    //Used instead of any data type
+        int scale=10;                         //to limit decimal places
+        for(int c = 0; c<oop.size();c++){
+            if(oop.get(c).equals(q)){
+                switch (oop.get(c)){
                      case "^":
                      ex = new BigDecimal(oop.get(c-1)).pow(Integer.parseInt(oop.get(c+1)));
                      break;
@@ -124,8 +125,8 @@ ArrayList<String> container;
                      ex = new BigDecimal(oop.get(c-1)).subtract(new BigDecimal(oop.get(c+1)));
                      break;
                  }oop.set(c, ex.setScale(scale, RoundingMode.UP).stripTrailingZeros().toString());
-                oop.remove(c+1);
-                oop.remove(c-1);
+                oop.remove(c+1);       //replace operators with results                                                         
+                oop.remove(c-1);        // remove used numbers numbers
                 }else{
                     continue;
                 }c=0;
