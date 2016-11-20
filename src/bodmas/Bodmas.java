@@ -29,13 +29,8 @@ ArrayList<String> container;
         System.out.println("Answer : " + result);
     }
     public String bracket(String box){
-        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){
+        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){  //condition
             for (int i=0;i<box.length();i++){
-                try{
-                if((box.charAt(i)==')' || Character.isDigit(box.charAt(i)))&& box.charAt(i+1)=='('){
-                    box=box.substring(0, i+1)+"*"+box.substring(i+1);
-                }
-                }catch (Exception ignored){}
                 if(box.charAt(i)==')'){
                     for(int j=i;j>=0;j--){
                         if(box.charAt(j)=='('){
@@ -54,7 +49,7 @@ ArrayList<String> container;
             }
         }
         box=reading(box);
-    return box;
+        return box;
     }
     /*Method that reads numbers and operators */
     public String reading(String read){
@@ -106,30 +101,32 @@ ArrayList<String> container;
         for(int c = 0; c<oop.size();c++){
             if(oop.get(c).equals(q)){
                 switch (oop.get(c)){
-                     case "^":
-                     ex = new BigDecimal(oop.get(c-1)).pow(Integer.parseInt(oop.get(c+1)));
-                     break;
-                     case "|":
-                     ex = new BigDecimal(Math.sqrt(Double.parseDouble(oop.get(c+1))));
-                     break;
-                     case "*":
-                     ex = new BigDecimal(oop.get(c-1)).multiply(new BigDecimal(oop.get(c+1)));
-                     break;
-                     case "/":
-                     ex = new BigDecimal(oop.get(c-1)).divideToIntegralValue(new BigDecimal(oop.get(c+1)));
-                     break;
-                     case "+":
-                     ex = new BigDecimal(oop.get(c-1)).add(new BigDecimal(oop.get(c+1)));
-                     break;
-                     case "-":
-                     ex = new BigDecimal(oop.get(c-1)).subtract(new BigDecimal(oop.get(c+1)));
-                     break;
-                 }oop.set(c, ex.setScale(scale, RoundingMode.UP).stripTrailingZeros().toString());
+                    case "^":
+                    ex = new BigDecimal(oop.get(c-1)).pow(Integer.parseInt(oop.get(c+1)));
+                    break;
+                    case "|":
+                    ex = new BigDecimal(Math.sqrt(Double.parseDouble(oop.get(c+1))));
+                    break;
+                    case "*":
+                    ex = new BigDecimal(oop.get(c-1)).multiply(new BigDecimal(oop.get(c+1)));
+                    break;
+                    case "/":
+                    ex = new BigDecimal(oop.get(c-1)).divideToIntegralValue(new BigDecimal(oop.get(c+1)));
+                    break;
+                    case "+":
+                    ex = new BigDecimal(oop.get(c-1)).add(new BigDecimal(oop.get(c+1)));
+                    break;
+                    case "-":
+                    ex = new BigDecimal(oop.get(c-1)).subtract(new BigDecimal(oop.get(c+1)));
+                    break;
+                }
+                oop.set(c, ex.setScale(scale, RoundingMode.UP).stripTrailingZeros().toString());
                 oop.remove(c+1);       //replace operators with results                                                         
                 oop.remove(c-1);        // remove used numbers numbers
-                }else{
-                    continue;
-                }c=0;
-                }return oop;
-            }
+            }else{
+                continue;
+            }c=0;
+        }
+        return oop;
+    }
 }
