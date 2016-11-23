@@ -28,23 +28,28 @@ ArrayList<String> container;
         String result = bodmasIs.bracket(yourExpress);
         System.out.println("Answer : " + result);
     }
+    /*Method that reads brackets*/
     public String bracket(String box){
-        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){  //condition
-            for (int i=0;i<box.length();i++){
-                if(box.charAt(i)==')'){
-                    for(int j=i;j>=0;j--){
+        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){ //condition input with bracket
+            for (int i=0;i<box.length();i++){  
+                try{                    
+                 if((box.charAt(i)==')'|| Character.isDigit(box.charAt(i))) //multiplication oprator to occur 
+                         &&box.charAt(i+1)=='('){                           //after the digit 
+                     box=box.substring(0, i+1)+"*"+box.substring(i+1);      //before open bracket '('
+                 } 
+                }catch(Exception ignored){}  
+                if(box.charAt(i)==')'){                                            
+                    for(int j=i;j>=0;j--){                                         
                         if(box.charAt(j)=='('){
-                            String in= box.substring(j+1, i);
-                            in= reading(in);
-                            box=box.substring(0, j)+in+box.substring(i+1);
+                            String in= box.substring(j+1, i);               //reading method
+                            in= reading(in);                                //should occur
+                            box=box.substring(0, j)+in+box.substring(i+1);  //inside the bracket
                             j=i=0;
                         }
                     }
                 }
             }
-            if(box.contains(Character.toString('('))||box.contains(Character.toString(')'))||
-                    box.contains(Character.toString('('))||box.contains(Character.toString(')'))){
-                System.out.println("Error: incorrect brackets placement");
+            if(box.contains(Character.toString('('))||box.contains(Character.toString(')'))){
                 return "Error: incorrect brackets placement";
             }
         }
@@ -64,11 +69,12 @@ ArrayList<String> container;
                 temp="";
             }
                   }
-              }else if(read.charAt(i)=='.' ){         //reads decimal
+              }else if(read.charAt(i)=='.' ){                       //reads decimal
                    temp =read.charAt(i)+temp;
                   }
-                  else if(read.charAt(i)=='-' && (i==0 || (!Character.isDigit(read.charAt(i-1)))))
-                  {                                   //read negative numbers
+                  else if(read.charAt(i)=='-' && (i==0 ||
+                          (!Character.isDigit(read.charAt(i-1)))))   //read negative numbers
+                  {                                  
                   temp =read.charAt(i)+temp;
                   if(!temp.equals("")){
                 container.add(0,temp);
@@ -96,8 +102,8 @@ ArrayList<String> container;
             }
     
     public ArrayList<String>operator(ArrayList<String> oop, String q){
-        BigDecimal ex = new BigDecimal(0);    //Used instead of any data type
         int scale=10;                         //to limit decimal places
+        BigDecimal ex = new BigDecimal(0);    //Used instead of any data type
         for(int c = 0; c<oop.size();c++){
             if(oop.get(c).equals(q)){
                 switch (oop.get(c)){
@@ -111,7 +117,7 @@ ArrayList<String> container;
                     ex = new BigDecimal(oop.get(c-1)).multiply(new BigDecimal(oop.get(c+1)));
                     break;
                     case "/":
-                    ex = new BigDecimal(oop.get(c-1)).divideToIntegralValue(new BigDecimal(oop.get(c+1)));
+                    ex = new BigDecimal(oop.get(c-1)).divide(new BigDecimal(oop.get(c+1)));
                     break;
                     case "+":
                     ex = new BigDecimal(oop.get(c-1)).add(new BigDecimal(oop.get(c+1)));
@@ -120,7 +126,7 @@ ArrayList<String> container;
                     ex = new BigDecimal(oop.get(c-1)).subtract(new BigDecimal(oop.get(c+1)));
                     break;
                 }
-                oop.set(c, ex.setScale(scale, RoundingMode.UP).stripTrailingZeros().toString());
+                oop.set(c, ex.setScale(scale, RoundingMode.UP).stripTrailingZeros().toPlainString());
                 oop.remove(c+1);       //replace operators with results                                                         
                 oop.remove(c-1);        // remove used numbers numbers
             }else{
