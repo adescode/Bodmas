@@ -30,14 +30,14 @@ ArrayList<String> container;
     }
     /*Method that reads brackets*/
     public String bracket(String box){
-        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){ //condition input with bracket
+        while(box.contains(Character.toString('(')) || box.contains(Character.toString(')'))){ //condition: input with bracket
             for (int i=0;i<box.length();i++){  
                 try{                    
                  if((box.charAt(i)==')'|| Character.isDigit(box.charAt(i))) //multiplication oprator to occur 
                          &&box.charAt(i+1)=='('){                           //after the digit 
                      box=box.substring(0, i+1)+"*"+box.substring(i+1);      //before open bracket '('
                  } 
-                }catch(Exception ignored){}  
+                }catch(Exception ignored){}                                 //ignore out of bounds exception
                 if(box.charAt(i)==')'){                                            
                     for(int j=i;j>=0;j--){                                         
                         if(box.charAt(j)=='('){
