@@ -23,32 +23,27 @@ import java.util.Scanner;
  */
 public class Bodmas {
 
-    ArrayList<String> container;
-    String temp;
+    private ArrayList<String> container;
+    private String temp;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        String yourExpress;
+        String expression;
         do {
             Scanner input = new Scanner(System.in);
             System.out.println("Enter expression:");
-            yourExpress = input.nextLine();
+            expression = input.nextLine();
             Bodmas bodmasCheck = new Bodmas();
-            String result = bodmasCheck.fileStore(yourExpress);
+            String result = bodmasCheck.checkFile(expression);
             System.out.println("Answer : " + result
                     + "\t(Enter @ to quit)\n");
-        } while (!yourExpress.equals("@"));
-        {
-            if (yourExpress.equals("@")) {
-                System.out.println("Done!!!");
-            }
-        }
+        } while (!expression.equals("@"));
     }
 
-    public String fileStore(String input) {
-        if (input.contains("=")) {                                          //condition: input with Equals sign
+    public String checkFile(String input) {
+        if (input.contains("=")) {                                      //condition: input with Equals sign
             for (int i = 0; i < input.length(); i++) {
                 if (input.charAt(i) == '=') {
                     String formula = input.substring(i + 1, input.length());
@@ -81,25 +76,26 @@ public class Bodmas {
                 }
             }
         }
-        input = isFormula(input);
+        input = checkFormula(input);
         return input;
     }
 
-    public String isFormula(String input) {
+    /*Method that reads Alhabet as formula*/
+    public String checkFormula(String input) {
         for (int i = 0; i < input.length(); i++) {
             while (Character.isAlphabetic(input.charAt(i))) {               //condition: input with Alphabet
                 Scanner in = new Scanner(System.in);
                 System.out.print(input.charAt(i) + "=");
                 String isAlphabet = in.next();
-                String nowDigit = input.replaceAll(Character.toString(input.charAt(i)), isAlphabet);
+                String nowDigit = input.replaceAll(Character.toString(input.charAt(i)), isAlphabet);//repalce all alphabet to digit
                 input = nowDigit;
             }
         }
         input = readBracket(input);
         return input;
     }
+    
     /*Method that reads brackets*/
-
     public String readBracket(String input) {
         while (input.contains(Character.toString('('))
                 || input.contains(Character.toString(')'))) {                          //condition: input with bracket
@@ -129,8 +125,8 @@ public class Bodmas {
         input = readInput(input);
         return input;
     }
-    /*Method that reads numbers and operators */
 
+    /*Method that reads numbers and operators */
     public String readInput(String input) {
         container = new ArrayList<>();                      //keeps input String
         temp = "";                                         //temporary String
@@ -202,7 +198,7 @@ public class Bodmas {
                             if (input.get(i + 1).equals("0")) {
                             }
                         } catch (Exception e) {
-                            System.out.println("Error : Division by zero" );
+                            System.out.println("Error : Division by zero");
                         }
                         break;
                     case "+":
