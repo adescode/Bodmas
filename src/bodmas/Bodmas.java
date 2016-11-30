@@ -94,7 +94,7 @@ public class Bodmas {
         input = readBracket(input);
         return input;
     }
-    
+
     /*Method that reads brackets*/
     public String readBracket(String input) {
         while (input.contains(Character.toString('('))
