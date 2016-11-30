@@ -22,7 +22,7 @@ import java.util.Scanner;
  * @author Adescode
  */
 public class Bodmas {
-
+    //Fixme: If these are not being accessed outside the class, make them private.
     ArrayList<String> container;
     String temp;
 
@@ -30,23 +30,30 @@ public class Bodmas {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        //Fixme: Why not just call this variable 'expression'; makes more sense, and is even shorter.
         String yourExpress;
         do {
             Scanner input = new Scanner(System.in);
             System.out.println("Enter expression:");
             yourExpress = input.nextLine();
+            
+            //Fixme: Why the name bodmasCheck, it's job is to check for something?
             Bodmas bodmasCheck = new Bodmas();
             String result = bodmasCheck.fileStore(yourExpress);
             System.out.println("Answer : " + result
                     + "\t(Enter @ to quit)\n");
         } while (!yourExpress.equals("@"));
-        {
+        {//Fixme: I don't see what this braces are doing.
             if (yourExpress.equals("@")) {
+                 //Fixme: The above test is unnecessary, code would not even get here if the condition weren't true
                 System.out.println("Done!!!");
             }
         }
     }
 
+    //Fixme: fileStore is a noun, this is a bad method name.
+    //From what this method appears to do, returning a String is bad practice.
+    //It should probably return a boolean value or an enum instead. That's taught in the book (Clean Code);
     public String fileStore(String input) {
         if (input.contains("=")) {                                          //condition: input with Equals sign
             for (int i = 0; i < input.length(); i++) {
@@ -57,6 +64,8 @@ public class Bodmas {
                     try {
                         if ((!formula.isEmpty()) && file.createNewFile()) {
                             try (
+                                    //Fixme: I don't understand the point of the indentation of the next two lines.
+                                    //I remember showing you how to format your code. Please do so regularly.
                                     FileOutputStream fileOS = new FileOutputStream(file);
                                     ObjectOutputStream objectOS = new ObjectOutputStream(fileOS)) {
                                 objectOS.writeUTF(formula);
@@ -85,6 +94,8 @@ public class Bodmas {
         return input;
     }
 
+    //Fixme: In Java, as in most languages, when a method is named isXXX it is supposed to return a boolean.
+    //This method is inappropriately named.
     public String isFormula(String input) {
         for (int i = 0; i < input.length(); i++) {
             while (Character.isAlphabetic(input.charAt(i))) {               //condition: input with Alphabet
@@ -99,7 +110,7 @@ public class Bodmas {
         return input;
     }
     /*Method that reads brackets*/
-
+                                            //Fixme: A space between the comment of the method and the method itself; for what? Fresh air?
     public String readBracket(String input) {
         while (input.contains(Character.toString('('))
                 || input.contains(Character.toString(')'))) {                          //condition: input with bracket
