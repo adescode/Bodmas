@@ -24,7 +24,10 @@ import java.util.Scanner;
 public class Bodmas {
 
     private ArrayList<String> container;
-    private String temp;
+    private String tempString;
+    private String title;
+    private String formula;
+    private File file;
 
     /**
      * @param args the command line arguments
@@ -35,68 +38,95 @@ public class Bodmas {
             Scanner input = new Scanner(System.in);
             System.out.println("Enter expression:");
             expression = input.nextLine();
-            Bodmas bodmasCheck = new Bodmas();
-            String result = bodmasCheck.checkFile(expression);
+            Bodmas bodmas = new Bodmas();
+            String result = bodmas.readExpression(expression);
             System.out.println("Answer : " + result
                     + "\t(Enter @ to quit)\n");
         } while (!expression.equals("@"));
     }
-
-    public String checkFile(String input) {
+    
+    String readExpression(String input){
+        input = inputWithEqualsSign(input);
+        return input;
+    }
+    
+    public String inputWithEqualsSign(String input) {
         if (input.contains("=")) {                                      //condition: input with Equals sign
             for (int i = 0; i < input.length(); i++) {
                 if (input.charAt(i) == '=') {
-                    String formula = input.substring(i + 1, input.length());
-                    String title = input.substring(0, i);
-                    File file = new File(title);
+                    formula = input.substring(i + 1, input.length());
+                    title = input.substring(0, i);
+                    file = new File(title);
                     try {
                         if ((!formula.isEmpty()) && file.createNewFile()) {
-                            try (
-                                    FileOutputStream fileOS = new FileOutputStream(file);
-                                    ObjectOutputStream objectOS = new ObjectOutputStream(fileOS)) {
-                                objectOS.writeUTF(formula);
-                                objectOS.close();
-                                fileOS.close();
-                            }
-                            return "formula saved";
+                            input = saveTitleAndFormula();
+                        } else if (file.exists() && !formula.isEmpty()) {
+                            return titleAlreadyExisted();
                         } else {
-                            try (
-                                    FileInputStream fileIS = new FileInputStream(file);
-                                    ObjectInputStream objectIS = new ObjectInputStream(fileIS)) {
-                                String loadFormula = objectIS.readUTF();
-                                input = loadFormula;
-                                objectIS.close();
-                                fileIS.close();
-                            } catch (FileNotFoundException ex) {
-                                return "File doesn't exist";
-                            }
+                            input = loadTitleFormula(input);
                         }
                     } catch (IOException ex) {
                     }
                 }
             }
         }
-        input = checkFormula(input);
+        input = alphabetInput(input);
+        return input;
+    }
+    
+    String saveTitleAndFormula() {
+        try {
+            try (
+                    FileOutputStream fileOS = new FileOutputStream(file);
+                    ObjectOutputStream objectOS = new ObjectOutputStream(fileOS)) {
+                objectOS.writeUTF(formula);
+                System.out.println("formula saved");
+                objectOS.close();
+                fileOS.close();
+            }
+        } catch (Exception ex) {
+        }
+        return "";
+    }
+
+    String titleAlreadyExisted() {
+        System.out.println("Title-Formula already existed ");
+        return "";
+    }
+
+    String loadTitleFormula(String input) {
+        try {
+            try (
+                    FileInputStream fileIS = new FileInputStream(file);
+                    ObjectInputStream objectIS = new ObjectInputStream(fileIS)) {
+                String loadFormula = objectIS.readUTF();
+                input = loadFormula;
+                objectIS.close();
+                fileIS.close();
+            } catch (FileNotFoundException ex) {
+            }
+        } catch (IOException ex) {
+        }
         return input;
     }
 
     /*Method that reads Alhabet as formula*/
-    public String checkFormula(String input) {
+    public String alphabetInput(String input) {
         for (int i = 0; i < input.length(); i++) {
             while (Character.isAlphabetic(input.charAt(i))) {               //condition: input with Alphabet
-                Scanner in = new Scanner(System.in);
-                System.out.print(input.charAt(i) + "=");
-                String isAlphabet = in.next();
+                Scanner scanner = new Scanner(System.in);
+                System.out.print(input.charAt(i) + " = ");
+                String isAlphabet = scanner.next();
                 String nowDigit = input.replaceAll(Character.toString(input.charAt(i)), isAlphabet);//repalce all alphabet to digit
                 input = nowDigit;
             }
         }
-        input = readBracket(input);
+        input = inputWithBracket(input);
         return input;
     }
 
     /*Method that reads brackets*/
-    public String readBracket(String input) {
+    public String inputWithBracket(String input) {
         while (input.contains(Character.toString('('))
                 || input.contains(Character.toString(')'))) {                          //condition: input with bracket
             for (int i = 0; i < input.length(); i++) {
@@ -119,7 +149,8 @@ public class Bodmas {
                 }
             }
             if (input.contains(Character.toString('(')) || input.contains(Character.toString(')'))) {
-                return "Error: incorrect brackets placement";
+                System.out.println("Error: incorrect brackets placement");
+                return "";
             }
         }
         input = readInput(input);
@@ -129,35 +160,35 @@ public class Bodmas {
     /*Method that reads numbers and operators */
     public String readInput(String input) {
         container = new ArrayList<>();                      //keeps input String
-        temp = "";                                         //temporary String
+        tempString = "";                                         //temporary String
         for (int i = input.length() - 1; i >= 0; i--) {   //precendence order of operation reads from RIGHT to LEFT
             if (Character.isDigit(input.charAt(i))) {
-                temp = input.charAt(i) + temp;
+                tempString = input.charAt(i) + tempString;
                 if (i == 0) {
-                    check();
+                    emptyTempString();
                 }
             } else if (input.charAt(i) == '.') {                    //reads decimal
                 if (input.charAt(i) == '.' && (i == 0)) {
                     return "Error in input";
                 } else {
-                    temp = input.charAt(i) + temp;
+                    tempString = input.charAt(i) + tempString;
                 }
             } else if (input.charAt(i) == '-' && (i == 0
                     || (!Character.isDigit(input.charAt(i - 1))))) //read negative numbers
             {
-                temp = input.charAt(i) + temp;
-                check();
+                tempString = input.charAt(i) + tempString;
+                emptyTempString();
             } else if ((input.charAt(i) == '+' || input.charAt(i) == '*'
                     || input.charAt(i) == '/' || input.charAt(i) == '^')
                     && (i == 0 || (!Character.isDigit(input.charAt(i - 1))))) {
                 return "Error in input";
             } else {
-                check();
-                temp += input.charAt(i);
-                check();
+                emptyTempString();
+                tempString += input.charAt(i);
+                emptyTempString();
                 if (input.charAt(i) == '|') {           //for root, empty space should replace
-                    temp += " ";                        //the Character before operator        
-                    check();                            //to be removed instead of result. 
+                    tempString += " ";                        //the Character before operator        
+                    emptyTempString();                            //to be removed instead of result. 
                 }
             }
         }
@@ -170,10 +201,10 @@ public class Bodmas {
         return container.get(0);             // return result
     }
 
-    public void check() {
-        if (!temp.equals("")) {
-            container.add(0, temp);
-            temp = "";
+    public void emptyTempString() {
+        if (!tempString.isEmpty()) {
+            container.add(0, tempString);
+            tempString= "";
         }
     }
 
