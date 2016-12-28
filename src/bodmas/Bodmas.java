@@ -28,52 +28,203 @@ public class Bodmas {
     private String title;
     private String formula;
     private File file;
+    private String loadFormula;
+    private final Scanner scanner = new Scanner(System.in);
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        Bodmas bodmas = new Bodmas();
+        bodmas.run();
+    }
+
+    public void run() {
         String expression;
         do {
-            Scanner input = new Scanner(System.in);
             System.out.println("Enter expression:");
-            expression = input.nextLine();
-            Bodmas bodmas = new Bodmas();
-            String result = bodmas.readExpression(expression);
+            expression = scanner.nextLine();
+            String result = readExpression(expression);
             System.out.println("Answer : " + result
                     + "\t(Enter @ to quit)\n");
         } while (!expression.equals("@"));
     }
-    
-    String readExpression(String input){
-        input = inputWithEqualsSign(input);
+
+    String readExpression(String input) {
+        if (input.isEmpty()) {
+            return emptyInput();
+        } else if (input.contains("=")) {
+            input = readEqualsSign(input.replaceAll("\\s", ""));
+        } else if ((input.contains("(") || input.contains(")")) && !input.contains("=")) {
+            input = specifyBracketType(input.replaceAll("\\s", ""));
+        } else if (input.matches("[a-zA-Z]+")) {
+            title = input;
+            file = new File(title);
+            if (file.exists()) {
+                input = loadSavedFormula();
+            } else {
+                input = fileNotFound();
+            }
+        } else {
+            input = convertFormulaValues(input.replaceAll("\\s", ""));
+        }
         return input;
     }
-    
-    public String inputWithEqualsSign(String input) {
-        if (input.contains("=")) {                                      //condition: input with Equals sign
-            for (int i = 0; i < input.length(); i++) {
-                if (input.charAt(i) == '=') {
-                    formula = input.substring(i + 1, input.length());
-                    title = input.substring(0, i);
-                    file = new File(title);
-                    try {
-                        if ((!formula.isEmpty()) && file.createNewFile()) {
-                            input = saveTitleAndFormula();
-                        } else if (file.exists() && !formula.isEmpty()) {
-                            return titleAlreadyExisted();
-                        } else {
-                            input = loadTitleFormula(input);
-                        }
-                    } catch (IOException ex) {
+
+    String fileNotFound() {
+        System.out.println("Error: File doesn't exist");
+        return "";
+    }
+
+    String emptyInput() {
+        System.out.println("Error: Empty expression");
+        return "";
+    }
+
+    public boolean inputContainsBracket(String input) {
+        if (input.contains(Character.toString('('))
+                || input.contains(Character.toString(')'))) {
+        }
+        return true;
+    }
+
+    public boolean formulaContainsCompleteBracket() {
+        if (formula.contains(Character.toString('('))
+                && formula.contains(Character.toString(')'))) {
+            System.out.println("complete formula bracket");
+        }
+        return true;
+    }
+
+    String inputContainsCompleteBracket(String input) {
+        if (input.contains(Character.toString('('))
+                && input.contains(Character.toString(')'))) {
+            System.out.println("complete input bracket");
+        }
+        return "";
+    }
+
+    public String getExpressionInBracket() {
+        for (int i = 0; i < formula.length(); i++) {
+            if (formula.charAt(i) == '(') {
+                for (int j = i; j <= formula.length(); j++) {
+                    if (formula.charAt(j) == ')') {
+                        String tempFormula = formula.substring(i + 1, j);
+                        formula = tempFormula;
                     }
                 }
             }
         }
-        input = alphabetInput(input);
+        return formula;
+    }
+
+    String replaceLoadedFormula() {
+        String expressionInBracket = getExpressionInBracket();
+        String[] splitExpressionInBracket = expressionInBracket.split(",");
+        String savedFormula = loadSavedFormula();
+        String[] splitSavedFormula = savedFormula.split("[-+*/^|()]");
+        String currentExpression;
+        int nextLoop = 0;
+        for (String currentSavedFormula : splitSavedFormula) {
+            if (currentSavedFormula.matches("[a-zA-Z]+")) {
+                nextLoop++;
+            }
+        }
+        if (splitExpressionInBracket.length < nextLoop || splitExpressionInBracket.length > nextLoop) {
+            savedFormula = incorrect();
+            return savedFormula;
+        } else {
+            for (int i = 0; i <= 0; i++) {
+                for (String currentSavedFormula : splitSavedFormula) {
+                    if (currentSavedFormula.matches("[a-zA-Z]+")) {
+                        title = splitExpressionInBracket[i];
+                        file = new File(title);
+                        if (file.exists()) {
+                            String loadsavedformula = loadSavedFormula();
+                            splitExpressionInBracket[i] = splitExpressionInBracket[i].replace(splitExpressionInBracket[i], loadsavedformula);
+                            currentExpression = splitExpressionInBracket[i];
+                        } else {
+                            if (splitExpressionInBracket[i].matches("[a-zA-Z]+") && !file.exists()) {
+                                savedFormula = "formula not found";
+                                return savedFormula;
+                            }
+                            currentExpression = splitExpressionInBracket[i];
+                        }
+                        String newSavedFormula = savedFormula.replace(currentSavedFormula, currentExpression);
+                        savedFormula = newSavedFormula;
+                        i++;
+                    }
+                }
+            }
+        }
+        savedFormula = convertFormulaValues(savedFormula);
+        return savedFormula;
+    }
+
+    String incorrect() {
+        System.out.println("Error: incorrect parameters");
+        return "";
+    }
+
+    String loadSavedFormula() {
+        try {
+            try (
+                    FileInputStream fileIS = new FileInputStream(file);
+                    ObjectInputStream objectIS = new ObjectInputStream(fileIS)) {
+                loadFormula = objectIS.readUTF();
+                objectIS.close();
+                fileIS.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println(ex.getMessage());
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return loadFormula;
+    }
+
+    String specifyBracketType(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) == '(') {
+                title = input.substring(0, i);
+                formula = input.substring(i, input.length());
+                file = new File(title);
+                if (file.exists()) {
+                    if (formula.contains(Character.toString('('))
+                            && formula.contains(Character.toString(')'))) {
+                        formula = replaceLoadedFormula();
+                        input = formula;
+                    } else {
+                        input = emptyInput();
+                    }
+                } else {
+                    input = convertFormulaValues(input);
+                }
+            }
+        }
         return input;
     }
-    
+
+    public String readEqualsSign(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) == '=') {
+                formula = input.substring(i + 1);
+                title = input.substring(0, i);
+                file = new File(title);
+                if ((!input.isEmpty()) && !file.exists()) {
+                    return saveTitleAndFormula();
+
+                } else if (file.exists() && !formula.isEmpty()) {
+                    return titleAlreadyExisted();
+                } else {
+                    input = loadSavedFormula();
+                    input = convertFormulaValues(input);
+                }
+            }
+        }
+        return input;
+    }
+
     String saveTitleAndFormula() {
         try {
             try (
@@ -85,8 +236,10 @@ public class Bodmas {
                 fileOS.close();
             }
         } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
         return "";
+
     }
 
     String titleAlreadyExisted() {
@@ -94,54 +247,41 @@ public class Bodmas {
         return "";
     }
 
-    String loadTitleFormula(String input) {
-        try {
-            try (
-                    FileInputStream fileIS = new FileInputStream(file);
-                    ObjectInputStream objectIS = new ObjectInputStream(fileIS)) {
-                String loadFormula = objectIS.readUTF();
-                input = loadFormula;
-                objectIS.close();
-                fileIS.close();
-            } catch (FileNotFoundException ex) {
-            }
-        } catch (IOException ex) {
-        }
-        return input;
-    }
-
-    /*Method that reads Alhabet as formula*/
-    public String alphabetInput(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            while (Character.isAlphabetic(input.charAt(i))) {               //condition: input with Alphabet
-                Scanner scanner = new Scanner(System.in);
-                System.out.print(input.charAt(i) + " = ");
-                String isAlphabet = scanner.next();
-                String nowDigit = input.replaceAll(Character.toString(input.charAt(i)), isAlphabet);//repalce all alphabet to digit
+    /*Method that convert letters to digit*/
+    public String convertFormulaValues(String input) {
+        String[] splitInput = input.split("[-+*/^|()]");
+        for (String newInput : splitInput) {
+            if (newInput.matches("[a-zA-Z]+")) {
+                System.out.print(newInput + " = ");
+                String isLetter = scanner.nextLine();
+                if (isLetter.isEmpty()) {
+                    return emptyInput();
+                }
+                String nowDigit = input.replace(newInput, isLetter.trim());
                 input = nowDigit;
             }
         }
-        input = inputWithBracket(input);
+        input = readInputWithBracket(input);
         return input;
     }
 
     /*Method that reads brackets*/
-    public String inputWithBracket(String input) {
+    public String readInputWithBracket(String input) {
         while (input.contains(Character.toString('('))
-                || input.contains(Character.toString(')'))) {                          //condition: input with bracket
+                || input.contains(Character.toString(')'))) {                             //condition: input with bracket
             for (int i = 0; i < input.length(); i++) {
                 try {
                     if ((input.charAt(i) == ')' || Character.isDigit(input.charAt(i))) //multiplication oprator to occur 
-                            && input.charAt(i + 1) == '(') {                           //after the digit 
-                        input = input.substring(0, i + 1) + "*" + input.substring(i + 1);      //before open bracket '('
+                            && input.charAt(i + 1) == '(') {                              //after the digit 
+                        input = input.substring(0, i + 1) + "*" + input.substring(i + 1); //before open bracket '('
                     }
-                } catch (Exception e) {                                                 //ignore out of bounds exception
+                } catch (Exception e) {                                                   //ignore out of bounds exception
                 }
                 if (input.charAt(i) == ')') {
                     for (int j = i; j >= 0; j--) {
                         if (input.charAt(j) == '(') {
                             String in = input.substring(j + 1, i);                        //readInput method
-                            in = readInput(in);                                           //should occur
+                            in = readInputDigitWithOperator(in);                          //should occur
                             input = input.substring(0, j) + in + input.substring(i + 1);  //inside the bracket
                             j = i = 0;
                         }
@@ -153,12 +293,12 @@ public class Bodmas {
                 return "";
             }
         }
-        input = readInput(input);
+        input = readInputDigitWithOperator(input);
         return input;
     }
 
     /*Method that reads numbers and operators */
-    public String readInput(String input) {
+    public String readInputDigitWithOperator(String input) {
         container = new ArrayList<>();                      //keeps input String
         tempString = "";                                         //temporary String
         for (int i = input.length() - 1; i >= 0; i--) {   //precendence order of operation reads from RIGHT to LEFT
@@ -180,7 +320,8 @@ public class Bodmas {
                 emptyTempString();
             } else if ((input.charAt(i) == '+' || input.charAt(i) == '*'
                     || input.charAt(i) == '/' || input.charAt(i) == '^')
-                    && (i == 0 || (!Character.isDigit(input.charAt(i - 1))))) {
+                    && ((i == 0 || (!Character.isDigit(input.charAt(i - 1))))
+                    || (i == input.length() - 1))) {
                 return "Error in input";
             } else {
                 emptyTempString();
@@ -192,8 +333,8 @@ public class Bodmas {
                 }
             }
         }
-        container = process(container, "^"); //power
-        container = process(container, "|"); //root*
+        container = process(container, "|"); //power
+        container = process(container, "^"); //root*
         container = process(container, "/"); //Divide
         container = process(container, "*"); //Multiple
         container = process(container, "+"); //Add
@@ -204,7 +345,7 @@ public class Bodmas {
     public void emptyTempString() {
         if (!tempString.isEmpty()) {
             container.add(0, tempString);
-            tempString= "";
+            tempString = "";
         }
     }
 
@@ -225,7 +366,7 @@ public class Bodmas {
                         break;
                     case "/":
                         try {
-                            bigDecimal = new BigDecimal(input.get(i - 1)).divide(new BigDecimal(input.get(i + 1)));
+                            bigDecimal = new BigDecimal(input.get(i - 1)).divide(new BigDecimal(input.get(i + 1)), scale, BigDecimal.ROUND_DOWN);
                             if (input.get(i + 1).equals("0")) {
                             }
                         } catch (Exception e) {
